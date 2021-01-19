@@ -3,6 +3,7 @@ import { useState } from 'react';
 import './App.css';
 import { Button } from './components/Button';
 import { BTN_TYPE } from './shared/constant';
+import { getResult } from './shared/helper';
 
 const buttons = [
   { id: 'zero', value: '0', type: BTN_TYPE.NUMBER },
@@ -25,7 +26,7 @@ const buttons = [
 ];
 
 function App() {
-  const [display, setDisplay] = useState(null);
+  const [display, setDisplay] = useState('');
   const [first, setFirst] = useState(null);
   const [second, setSecond] = useState(null);
   const [operator, setOperator] = useState(null);
@@ -34,16 +35,19 @@ function App() {
     const btnItem = buttons.find((item) => item.id === btnId);
     if (!btnItem) return;
     if (btnItem.type === BTN_TYPE.CLEAR) {
-      setDisplay(null);
+      setDisplay('');
       return;
     }
     if (btnItem.type === BTN_TYPE.EQUAL) {
+      const a = first;
+      const b = Number(display);
+      setDisplay(getResult(a, b, operator));
       return;
     }
-    if (btnItem.type === BTN_TYPE.MATH_OPERATOR && btnItem.value !== operator) {
-      setFirst(display);
-      setOperator(operator);
-      // setDisplay(btnItem.value);
+    if (btnItem.type === BTN_TYPE.MATH_OPERATOR) {
+      setFirst(Number(display));
+      setOperator(btnItem.value);
+      setDisplay('');
       return;
     }
     if (btnItem.type === BTN_TYPE.DECIMAL_POINT && display.includes('.')) return;
