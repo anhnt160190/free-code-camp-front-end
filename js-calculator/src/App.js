@@ -25,26 +25,53 @@ const buttons = [
 ];
 
 function App() {
-  const [display, setDisplay] = useState(0);
+  const [display, setDisplay] = useState(null);
+  const [first, setFirst] = useState(null);
+  const [second, setSecond] = useState(null);
+  const [operator, setOperator] = useState(null);
 
   const onClickBtn = (btnId) => {
     const btnItem = buttons.find((item) => item.id === btnId);
     if (!btnItem) return;
     if (btnItem.type === BTN_TYPE.CLEAR) {
-      setDisplay(0);
+      setDisplay(null);
       return;
     }
-    if (display === 0 && btnItem.id === 'zero') return;
+    if (btnItem.type === BTN_TYPE.EQUAL) {
+      return;
+    }
+    if (btnItem.type === BTN_TYPE.MATH_OPERATOR && btnItem.value !== operator) {
+      setFirst(display);
+      setOperator(operator);
+      // setDisplay(btnItem.value);
+      return;
+    }
+    if (btnItem.type === BTN_TYPE.DECIMAL_POINT && display.includes('.')) return;
+    if (!display && btnItem.value === '0') return;
     setDisplay(display + btnItem.value);
   };
 
   return (
-    <div className="App">
-      <div>
+    <div className="App" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto' }}>
         {buttons.map((item, index) => (
           <Button button={item} key={index} onClickBtn={onClickBtn} />
         ))}
-        <span id="display">{display}</span>
+        <div
+          id="display"
+          style={{
+            border: '1px solid #000',
+            width: 300,
+            height: 32,
+            borderRadius: 5,
+            display: 'flex',
+            alignItems: 'center',
+            margin: 5,
+            padding: '0 5px',
+          }}
+        >
+          {display || 0}
+        </div>
       </div>
     </div>
   );
