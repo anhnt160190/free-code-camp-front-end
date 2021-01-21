@@ -3,7 +3,6 @@ import { useState } from 'react';
 import './App.css';
 import { Button } from './components/Button';
 import { BTN_TYPE } from './shared/constant';
-import { getResult } from './shared/helper';
 
 const buttons = [
   { id: 'zero', value: '0', type: BTN_TYPE.NUMBER },
@@ -26,37 +25,54 @@ const buttons = [
 ];
 
 function App() {
-  const [display, setDisplay] = useState('');
-  const [first, setFirst] = useState(null);
-  const [second, setSecond] = useState(null);
-  const [operator, setOperator] = useState(null);
+  const [display, setDisplay] = useState([]);
 
   const onClickBtn = (btnId) => {
     const btnItem = buttons.find((item) => item.id === btnId);
     if (!btnItem) return;
     if (btnItem.type === BTN_TYPE.CLEAR) {
-      setDisplay('');
+      setDisplay([]);
       return;
     }
     if (btnItem.type === BTN_TYPE.EQUAL) {
-      const a = first;
-      const b = Number(display);
-      setDisplay(getResult(a, b, operator));
+      const regex = /([+*\-\\]){3,}/g;
+      const newArray = [...display];
+      const check = regex.test(newArray.join(''));
+      if (check) {
+        setDisplay([eval(newArray.join('').split(regex).join(' '))]);
+      } else {
+        setDisplay([eval(display.join(' '))]);
+      }
       return;
     }
     if (btnItem.type === BTN_TYPE.MATH_OPERATOR) {
-      setFirst(Number(display));
-      setOperator(btnItem.value);
-      setDisplay('');
+      if (display.length === 0 && (btnItem.value === '*' || btnItem.value === '/')) return;
+      setDisplay([...display, btnItem.value]);
       return;
     }
-    if (btnItem.type === BTN_TYPE.DECIMAL_POINT && display.includes('.')) return;
-    if (!display && btnItem.value === '0') return;
-    setDisplay(display + btnItem.value);
+    if (btnItem.value === '0' && display[display.length - 1] == 0) {
+      return;
+    }
+    if (
+      btnItem.type === BTN_TYPE.DECIMAL_POINT &&
+      display[display.length - 1] &&
+      display[display.length - 1].includes('.')
+    )
+      return;
+    const newDisplay = [...display];
+    if (newDisplay.length === 0) {
+      newDisplay.push(btnItem.value);
+    } else {
+      newDisplay[newDisplay.length - 1] = newDisplay[newDisplay.length - 1] + btnItem.value;
+    }
+    setDisplay(newDisplay);
   };
 
   return (
-    <div className="App" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div
+      className="App"
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+    >
       <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto' }}>
         {buttons.map((item, index) => (
           <Button button={item} key={index} onClickBtn={onClickBtn} />
@@ -74,7 +90,7 @@ function App() {
             padding: '0 5px',
           }}
         >
-          {display || 0}
+          {display.length === 0 ? 0 : display.join('')}
         </div>
       </div>
     </div>
